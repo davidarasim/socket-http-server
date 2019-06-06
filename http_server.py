@@ -1,8 +1,11 @@
 import socket
 import sys
 import traceback
+import os
 
-def response_ok(body=b"This is a minimal response", mimetype=b"text/plain"):
+
+def response_ok(body=b"Default response (no body provided)", mimetype=b"text/plain"):
+    print('[server] inside response_ok()') # DKA
     """
     returns a basic HTTP response
     Ex:
@@ -19,24 +22,40 @@ def response_ok(body=b"This is a minimal response", mimetype=b"text/plain"):
         '''
     """
 
-    # TODO: Implement response_ok
-    return b""
+    return b"\r\n".join([
+        b"HTTP/1.1 200 OK",
+        b"Content-Type: " + mimetype,
+        b"",
+        body,
+    ])
+
 
 def response_method_not_allowed():
+    print('[server] inside response_method_not_allowed()') # DKA
     """Returns a 405 Method Not Allowed response"""
 
-    # TODO: Implement response_method_not_allowed
-    return b""
+    return b"\r\n".join([
+        b"HTTP/1.1 405 NOT ALLOWED",
+        b"Content-Type: text/plain",
+        b"",
+        b"Not Allowed!",
+    ])
 
 
 def response_not_found():
+    print('[server] inside response_not_found()') # DKA
     """Returns a 404 Not Found response"""
 
-    # TODO: Implement response_not_found
-    return b""
+    return b"\r\n".join([
+        b"HTTP/1.1 404 NOT FOUND",
+        b"Content-Type: text/plain",
+        b"",
+        b"Not Found!",
+    ])
 
 
 def parse_request(request):
+    print('[server] inside parse_request()') # DKA
     """
     Given the content of an HTTP request, returns the path of that request.
 
@@ -44,10 +63,16 @@ def parse_request(request):
     NotImplementedError if the method of the request is not GET.
     """
 
-    # TODO: implement parse_request
-    return ""
+    method, path, version = request.split("\r\n")[0].split(" ")
+    
+    if method != "GET":
+        raise NotImplementedError
+
+    return path
+
 
 def response_path(path):
+    print('[server] inside response_path() path: {}'.format(path)) # DKA
     """
     This method should return appropriate content and a mime type.
 
@@ -85,14 +110,17 @@ def response_path(path):
     # If the path is "make_time.py", then you may OPTIONALLY return the
     # result of executing `make_time.py`. But you need only return the
     # CONTENTS of `make_time.py`.
-    
-    content = b"not implemented"
-    mime_type = b"not implemented"
 
-    return content, mime_type
+    with open(path, 'rb') as f:  # DKA etc...
+        print('[server] inside response_path() open path: {}'.format(path)) # DKA
+        content = f.read()
+#        mime_type = b"not implemented" DKA
+
+    return content
 
 
 def server(log_buffer=sys.stderr):
+    print('[server] inside server()') # DKA
     address = ('127.0.0.1', 10000)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -118,20 +146,28 @@ def server(log_buffer=sys.stderr):
 
                 print("Request received:\n{}\n\n".format(request))
 
-                # TODO: Use parse_request to retrieve the path from the request.
+                try:
+                    path = parse_request(request)
+                    print('[server] this path: "{}"'.format(path)) # DKA
+                    local_path = os.path.join('webroot', *path.split('/'))
+                    print('[server] local_path: "{}"'.format(local_path)) # DKA
+                    # TODO: Use response_path to retrieve the content and the mimetype,
+                    # based on the request path.
 
-                # TODO: Use response_path to retrieve the content and the mimetype,
-                # based on the request path.
+                    # TODO; If parse_request raised a NotImplementedError, then let
+                    # response be a method_not_allowed response. If response_path raised
+                    # a NameError, then let response be a not_found response. Else,
+                    # use the content and mimetype from response_path to build a 
+                    # response_ok.
 
-                # TODO; If parse_request raised a NotImplementedError, then let
-                # response be a method_not_allowed response. If response_path raised
-                # a NameError, then let response be a not_found response. Else,
-                # use the content and mimetype from response_path to build a 
-                # response_ok.
-                response = response_ok(
-                    body=b"Welcome to my web server",
-                    mimetype=b"text/plain"
-                )
+                    response = response_ok(
+#                        body='b"' + path + '"', DKA
+#                        body=b"/sample.txt", # DKA
+                        body = response_path(local_path)
+#                        mimetype = b"text/plain" DKA
+                    )
+                except NotImplementedError:
+                    response = response_method_not_allowed()
 
                 conn.sendall(response)
             except:
@@ -147,7 +183,6 @@ def server(log_buffer=sys.stderr):
 
 
 if __name__ == '__main__':
+    print('[server] inside __main__') # DKA
     server()
     sys.exit(0)
-
-
