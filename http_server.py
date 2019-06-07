@@ -5,7 +5,6 @@ import os
 
 
 def response_ok(body=b"Default response (no body provided)", mimetype=b"text/plain"):
-    print('[server] inside response_ok()') # DKA
     """
     returns a basic HTTP response
     Ex:
@@ -31,7 +30,6 @@ def response_ok(body=b"Default response (no body provided)", mimetype=b"text/pla
 
 
 def response_method_not_allowed():
-    print('[server] inside response_method_not_allowed()') # DKA
     """Returns a 405 Method Not Allowed response"""
 
     return b"\r\n".join([
@@ -43,7 +41,6 @@ def response_method_not_allowed():
 
 
 def response_not_found():
-    print('[server] inside response_not_found()') # DKA
     """Returns a 404 Not Found response"""
 
     return b"\r\n".join([
@@ -55,7 +52,6 @@ def response_not_found():
 
 
 def parse_request(request):
-    print('[server] inside parse_request()') # DKA
     """
     Given the content of an HTTP request, returns the path of that request.
 
@@ -72,7 +68,6 @@ def parse_request(request):
 
 
 def response_path(path):
-    print('[server] inside response_path() path: {}'.format(path)) # DKA
     """
     This method should return appropriate content and a mime type.
 
@@ -111,16 +106,14 @@ def response_path(path):
     # result of executing `make_time.py`. But you need only return the
     # CONTENTS of `make_time.py`.
 
-    with open(path, 'rb') as f:  # DKA etc...
-        print('[server] inside response_path() open path: {}'.format(path)) # DKA
+    with open(path, 'rb') as f:
         content = f.read()
-#        mime_type = b"not implemented" DKA
+#        mime_type = b"not implemented" # DKA
 
     return content
 
 
 def server(log_buffer=sys.stderr):
-    print('[server] inside server()') # DKA
     address = ('127.0.0.1', 10000)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -148,9 +141,7 @@ def server(log_buffer=sys.stderr):
 
                 try:
                     path = parse_request(request)
-                    print('[server] this path: "{}"'.format(path)) # DKA
                     local_path = os.path.join('webroot', *path.split('/'))
-                    print('[server] local_path: "{}"'.format(local_path)) # DKA
                     # TODO: Use response_path to retrieve the content and the mimetype,
                     # based on the request path.
 
@@ -160,11 +151,16 @@ def server(log_buffer=sys.stderr):
                     # use the content and mimetype from response_path to build a 
                     # response_ok.
 
+                    if '.jpg' in local_path:
+                        mimetype = b"image/jpeg"
+                    elif '.png' in local_path:
+                        mimetype = b"image/png"
+                    else:
+                        mimetype = b"text/plain"
+
                     response = response_ok(
-#                        body='b"' + path + '"', DKA
-#                        body=b"/sample.txt", # DKA
-                        body = response_path(local_path)
-#                        mimetype = b"text/plain" DKA
+                        body = response_path(local_path),
+                        mimetype = mimetype
                     )
                 except NotImplementedError:
                     response = response_method_not_allowed()
@@ -183,6 +179,5 @@ def server(log_buffer=sys.stderr):
 
 
 if __name__ == '__main__':
-    print('[server] inside __main__') # DKA
     server()
     sys.exit(0)

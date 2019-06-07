@@ -63,20 +63,12 @@ class WebTestCase(unittest.TestCase):
         error_comment = "Error encountered while visiting " + web_path
 
         response = self.get_response(web_path)
-        print('[test] local_path: "{}"'.format(local_path)) # DKA
-        print('[test] web_path: "{}"'.format(web_path)) # DKA
-        print('[test] response: "{}"'.format(response)) # DKA
-        print('[test] response.getcode(): "{}"'.format(response.getcode())) # DKA
         self.assertEqual(response.getcode(), 200, error_comment)
 
         with open(local_path, 'rb') as f:
             self.assertEqual(f.read(), response.read(), error_comment)
-#            print('[test] f.read(): "{}"'.format(f.read())) # DKA
-#            print('[test] response.read(): "{}"'.format(response.read())) # DKA
 
-#        assert False # DKA
 
-''' DKA commented out
     def test_get_sample_text_mime_type(self):
         """
         A call to /sample.txt returns the correct mimetype
@@ -90,6 +82,7 @@ class WebTestCase(unittest.TestCase):
 
         self.assertEqual(response.getcode(), 200, error_comment)
         self.assertEqual(response.getheader('Content-Type'), 'text/plain', error_comment)
+
 
     def test_get_sample_scene_balls_jpeg(self):
         """
@@ -108,6 +101,7 @@ class WebTestCase(unittest.TestCase):
         with open(local_path, 'rb') as f:
             self.assertEqual(f.read(), response.read(), error_comment)
 
+
     def test_get_sample_scene_balls_jpeg_mime_type(self):
         """
         A call to /images/Sample_Scene_Balls.jpg returns the correct mimetype
@@ -121,6 +115,7 @@ class WebTestCase(unittest.TestCase):
 
         self.assertEqual(response.getcode(), 200, error_comment)
         self.assertEqual(response.getheader('Content-Type'), 'image/jpeg', error_comment)
+
 
     def test_get_sample_1_png(self):
         """
@@ -139,6 +134,7 @@ class WebTestCase(unittest.TestCase):
         with open(local_path, 'rb') as f:
             self.assertEqual(f.read(), response.read(), error_comment)
 
+
     def test_get_sample_1_png_mime_type(self):
         """
         A call to /images/sample_1.png returns the correct mimetype
@@ -153,6 +149,8 @@ class WebTestCase(unittest.TestCase):
         self.assertEqual(response.getcode(), 200, error_comment)
         self.assertEqual(response.getheader('Content-Type'), 'image/png', error_comment)
 
+
+''' DKA commented out
     def test_get_404(self):
         """
         A call to /asdf.txt (a file which does not exist in webroot) yields a 404 error
@@ -165,6 +163,7 @@ class WebTestCase(unittest.TestCase):
         response = self.get_response(web_path)
 
         self.assertEqual(response.getcode(), 404, error_comment)
+
 
     def test_images_index(self):
         """
